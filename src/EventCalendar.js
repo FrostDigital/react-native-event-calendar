@@ -95,9 +95,6 @@ export default class EventCalendar extends React.Component {
 
     return (
       <View style={[this.styles.container, { width }]}>
-      {this.props.renderHeader ? (
-        this.props.renderHeader({this._previous, this._next})
-      ) : (
         <View style={this.styles.header}>
           <TouchableOpacity
               style={this.styles.arrowButton}
@@ -114,7 +111,7 @@ export default class EventCalendar extends React.Component {
           >
             {rightIcon}
           </TouchableOpacity>
-        </View>)}
+        </View>
         <DayView
           date={date}
           index={index}
