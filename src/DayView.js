@@ -1,5 +1,5 @@
 // @flow
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Animated, Easing } from "react-native";
 import populateEvents from "./Packer";
 import React from "react";
 import moment from "moment";
@@ -21,10 +21,17 @@ export default class DayView extends React.PureComponent {
 	constructor(props) {
 		super(props);
 		const { initPosition, packedEvents } = this.setupConfigurations(props);
+
+		this.setupRedLineAnimation();
+		
 		this.state = {
 			_scrollY: initPosition,
 			packedEvents
 		};
+	}
+
+	componentDidMount() {
+		if (this.isToday()) this.redLineAnimation.start();
 	}
 
 	componentWillReceiveProps(nextProps) {
@@ -44,6 +51,10 @@ export default class DayView extends React.PureComponent {
 		);
 	}
 
+	componentWillUnmount() {
+		this.redLineY.stopAnimation();
+	}
+
 	setupConfigurations(props) {
 		this.calendarHeight = (props.end - props.start) * 100;
 		const width = props.width - LEFT_MARGIN;
@@ -57,6 +68,19 @@ export default class DayView extends React.PureComponent {
 		return { initPosition, packedEvents };
 	}
 
+	setupRedLineAnimation = () => {
+		const today = moment();
+		const dayEnd = today.clone().endOf("d");
+		const duration = dayEnd.diff(today);
+		this.redLineY = new Animated.Value(this.getAnimatedValue(today));
+		this.redLineAnimation = Animated.timing(this.redLineY, {
+			toValue: this.getAnimatedValue(dayEnd),
+			duration: duration,
+			easing: Easing.linear,
+			isInteraction: false
+		});
+	};
+
 	scrollToFirst() {
 		setTimeout(() => {
 			if (this.state && this.state._scrollY && this._scrollView) {
@@ -69,20 +93,35 @@ export default class DayView extends React.PureComponent {
 		}, 1);
 	}
 
+	getAnimatedValue = d => {
+		const date = d.clone();
+		const hours = date.hours();
+		const minutes = date.minutes();
+		return 60 * hours + minutes;
+	};
+
+	isToday = () => {
+		const today = moment();
+		return today.isSame(this.props.date, "day");
+	};
+
 	_renderRedLine() {
 		const offset = 100;
-		const { format24h } = this.props;
+		const { start, end } = this.props;
 		const { width, styles } = this.props;
-		const timeNowHour = moment().hour();
-		const timeNowMin = moment().minutes();
+		
+		const y = this.redLineY.interpolate({
+			inputRange: [start * 60, end * 60],
+			outputRange: [0, ((end - start) * offset)]
+		});
 		return (
-			<View
+			<Animated.View
 				key={`timeNow`}
 				style={[
 					styles.lineNow,
 					{
-						top: offset * (timeNowHour - this.props.start) + (offset * timeNowMin) / 60,
-						width: width - 20
+						width: width - 20,
+						transform: [{ translateY: y }]
 					}
 				]}
 			/>
@@ -197,7 +236,7 @@ export default class DayView extends React.PureComponent {
 			>
 				{this._renderLines()}
 				{this._renderEvents()}
-				{moment().isSame(date, "day") && this._renderRedLine()}
+				{this.isToday() && this._renderRedLine()}
 			</ScrollView>
 		);
 	}
