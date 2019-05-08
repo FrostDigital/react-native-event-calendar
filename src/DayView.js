@@ -69,6 +69,10 @@ export default class DayView extends React.PureComponent {
 		}, 1);
 	}
 
+	formatTime(i) {
+		return `${("0" + i).slice(-2)}:00`;
+	}
+
 	_renderRedLine() {
 		const offset = 100;
 		const { format24h } = this.props;
@@ -98,13 +102,13 @@ export default class DayView extends React.PureComponent {
 			if (i === start) {
 				timeText = ``;
 			} else if (i < 12) {
-				timeText = !format24h ? `${i} AM` : i;
+				timeText = !format24h ? `${i} AM` : this.formatTime(i);
 			} else if (i === 12) {
-				timeText = !format24h ? `${i} PM` : i;
+				timeText = !format24h ? `${i} PM` : this.formatTime(i);
 			} else if (i === 24) {
 				timeText = !format24h ? `12 AM` : 0;
 			} else {
-				timeText = !format24h ? `${i - 12} PM` : i;
+				timeText = !format24h ? `${i - 12} PM` : this.formatTime(i);
 			}
 			const { width, styles } = this.props;
 			return [
