@@ -77,7 +77,7 @@ export default class EventView extends React.PureComponent {
 				this._scrollView.scrollTo({
 					x: 0,
 					y: this.state._scrollY,
-					animated: true
+					animated: false
 				});
 			}
 		}, 1);
