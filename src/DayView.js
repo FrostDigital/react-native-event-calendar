@@ -63,7 +63,7 @@ export default class DayView extends React.PureComponent {
 				this._scrollView.scrollTo({
 					x: 0,
 					y: this.state._scrollY,
-					animated: true
+					animated: false
 				});
 			}
 		}, 1);
