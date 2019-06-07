@@ -1,5 +1,5 @@
 // @flow
-import { View, Text, ScrollView, StyleSheet } from "react-native";
+import { View, Text, ScrollView, StyleSheet, RefreshControl } from "react-native";
 import populateEvents from "./Packer";
 import React from "react";
 import moment from "moment";
@@ -189,7 +189,7 @@ export default class EventView extends React.PureComponent {
 	}
 
 	render() {
-		const { mode, styles, date, width } = this.props;
+		const { mode, styles, date, width, isRefreshing, onRefresh } = this.props;
 		const eventComponent =
 			mode === "week"
 				? this.renderWeekView()
@@ -198,12 +198,11 @@ export default class EventView extends React.PureComponent {
 			<ScrollView
 				ref={ref => (this._scrollView = ref)}
 				contentContainerStyle={[styles.contentStyle, { width }]}
+				refreshControl={<RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />}
 				onLayout={e => (this._scrollViewHeight = e.nativeEvent.layout.height)}
 			>
 				{this._renderLines()}
-				<View style={{ marginLeft: LEFT_MARGIN, marginRight: LEFT_MARGIN }}>
-					{eventComponent}
-				</View>
+				<View style={{ marginLeft: LEFT_MARGIN, marginRight: LEFT_MARGIN }}>{eventComponent}</View>
 			</ScrollView>
 		);
 	}

@@ -53,7 +53,9 @@ export default class EventCalendar extends React.Component {
 			scrollToFirst = true,
 			start = 0,
 			end = 24,
-			events
+			events,
+			isRefreshing,
+			onRefresh
 		} = this.props;
 		const date = moment(initDate);
 
@@ -72,6 +74,8 @@ export default class EventCalendar extends React.Component {
 					width={width}
 					styles={this.styles}
 					scrollToFirst={scrollToFirst}
+					isRefreshing={isRefreshing}
+					onRefresh={onRefresh}
 					start={start}
 					end={end}
 				/>
