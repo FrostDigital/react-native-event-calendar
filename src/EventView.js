@@ -40,7 +40,7 @@ export default class EventView extends React.PureComponent {
 	}
 
 	getSingleViewWidth = ({ mode, width }) => {
-		const contentWidth = width - (LEFT_MARGIN * 2)
+		const contentWidth = width - LEFT_MARGIN - 10;
 		return mode === "week" ? contentWidth / 7 : contentWidth;
 	};
 
@@ -134,9 +134,9 @@ export default class EventView extends React.PureComponent {
 					{timeText}
 				</Text>,
 				i === start ? null : (
-					<View key={`line${i}`} style={[styles.line, { top: offset * index, width: width - 98 }]} />
+					<View key={`line${i}`} style={[styles.line, { top: offset * index, width: width - LEFT_MARGIN }]} />
 				),
-				<View key={`lineHalf${i}`} style={[styles.line, { top: offset * (index + 0.5), width: width - 98 }]} />
+				<View key={`lineHalf${i}`} style={[styles.line, { top: offset * (index + 0.5), width: width - LEFT_MARGIN }]} />
 			];
 		});
 	}
