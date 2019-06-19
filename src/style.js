@@ -114,6 +114,9 @@ export default function styleConstructor(theme = {}, calendarHeight) {
 			borderColor: "rgb(216,216,216)",
 			borderLeftWidth: 1,
 			...theme.dayViewBorder
+		},
+		todayStyle: {
+			...theme.todayStyle
 		}
 	};
 	return StyleSheet.create(style);

@@ -79,10 +79,17 @@ export default class DayView extends Component {
 
 	render() {
 		const { styles, date, width } = this.props;
+		const today = moment();
+		const isToday = today.isSame(date, "day");
+		let viewStyles = [styles.dayView, { width }];
+		if (isToday) {
+			viewStyles.push(styles.todayStyle);
+		}
+
 		return (
-			<View style={[styles.dayView, { width }]}>
+			<View style={viewStyles}>
 				{this._renderEvents()}
-				{moment().isSame(date, "day") && this._renderRedLine()}
+				{isToday && this._renderRedLine()}
 			</View>
 		);
 	}
