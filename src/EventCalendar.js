@@ -55,7 +55,7 @@ export default class EventCalendar extends React.Component {
 			end = 24,
 			events,
 			isRefreshing,
-			onRefresh
+			onRefresh,
 			locale
 		} = this.props;
 		const date = moment(initDate);
