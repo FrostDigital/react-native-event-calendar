@@ -151,8 +151,8 @@ export default class EventView extends React.PureComponent {
 
 	renderWeekView() {
 		const date = moment(this.props.date);
-		const startOfWeek = date.clone().startOf("isoWeek");
-		const endOfWeek = date.clone().endOf("isoWeek");
+		const startOfWeek = date.locale('en').startOf("w").clone();
+		const endOfWeek = date.locale('en').endOf("w").clone();
 		const { styles } = this.props;
 		
 		let components = [];
