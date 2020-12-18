@@ -23,6 +23,11 @@ export default class DayView extends Component {
 				backgroundColor: event.color
 			};
 
+			const eventBorderColor = {
+				borderColor: event.borderColor,
+				borderWidth: 1
+			};
+
 			// Fixing the number of lines for the event title makes this calculation easier.
 			// However it would make sense to overflow the title to a new line if needed
 			const numberOfLines = Math.floor(event.height / TEXT_LINE_HEIGHT);
@@ -32,7 +37,7 @@ export default class DayView extends Component {
 					activeOpacity={0.5}
 					onPress={() => this._onEventTapped(event)}
 					key={i}
-					style={[styles.event, style, event.color && eventColor]}
+					style={[styles.event, style, event.color && eventColor, event.borderColor && eventBorderColor ]}
 				>
 					{this.props.renderEvent ? (
 						this.props.renderEvent(event)
