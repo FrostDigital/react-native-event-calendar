@@ -37,7 +37,7 @@ export default class DayView extends Component {
 					activeOpacity={0.5}
 					onPress={() => this._onEventTapped(event)}
 					key={i}
-					style={[styles.event, style, event.color && eventColor, event.borderColor && eventBorderColor ]}
+					style={[event.borderColor && {...style.event, eventBorderColor}, event.color && eventColor,]}
 				>
 					{this.props.renderEvent ? (
 						this.props.renderEvent(event)
