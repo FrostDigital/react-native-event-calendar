@@ -107,12 +107,12 @@ export default class EventView extends React.PureComponent {
 		return groupedEvents;
 	};
 
-	formatTime(i) {
-		return `${("0" + i).slice(-2)}:00`;
-			}
+	formatTime(i, showQuarters) {
+		return showQuarters ? `${("" + i).slice(-2)}` :  `${("0" + i).slice(-2)}:00`;
+	}
 
 	_renderLines() {
-		const { format24h, start, end } = this.props;
+		const { format24h, start, end, showQuarters } = this.props;
 		const offset = this.calendarHeight / (end - start);
 
 		return range(start, end + 1).map((i, index) => {
@@ -120,13 +120,13 @@ export default class EventView extends React.PureComponent {
 			if (i === start) {
 				timeText = ``;
 			} else if (i < 12) {
-				timeText = !format24h ? `${i} AM` : this.formatTime(i);
+				timeText = !format24h ? `${i} AM` : this.formatTime(i, showQuarters);
 			} else if (i === 12) {
-				timeText = !format24h ? `${i} PM` : this.formatTime(i);
+				timeText = !format24h ? `${i} PM` : this.formatTime(i, showQuarters);
 			} else if (i === 24) {
 				timeText = !format24h ? `12 AM` : 0;
 			} else {
-				timeText = !format24h ? `${i - 12} PM` : this.formatTime(i);
+				timeText = !format24h ? `${i - 12} PM` : this.formatTime(i, showQuarters);
 			}
 			const { width, styles } = this.props;
 			return [
@@ -160,7 +160,7 @@ export default class EventView extends React.PureComponent {
 		let style = styles;
 
 		while (day <= endOfWeek) {
-			components.push(this.renderDayView(day, this.state.packedEvents[day.format(DATE_FORMAT)] || [], style));
+			components.push(this.renderDayView(day, this.state.packedEvents[day.format(DATE_FORMAT)] || [], style, false));
 			day = day.clone().add(1, "d");
 			style = this.borderStyle;
 		}
@@ -172,8 +172,9 @@ export default class EventView extends React.PureComponent {
 		);
 	}
 
-	renderDayView(date, events, styles) {
+	renderDayView(date, events, styles, isDayView) {
 		const { mode, start, end, format24h, width } = this.props;
+		
 		return (
 			<DayView 
 				key={date}
@@ -184,6 +185,7 @@ export default class EventView extends React.PureComponent {
 				events={events} 
 				width={this.getSingleViewWidth({ mode, width })} 
 				styles={styles} start={start} end={end} 
+				showQuarters={this.props.showQuarters && isDayView}
 			/>
 		);
 	}
@@ -193,7 +195,7 @@ export default class EventView extends React.PureComponent {
 		const eventComponent =
 			mode === "week"
 				? this.renderWeekView()
-				: this.renderDayView(date, this.state.packedEvents[date.format(DATE_FORMAT)] || [], styles);
+				: this.renderDayView(date, this.state.packedEvents[date.format(DATE_FORMAT)] || [], styles, true);
 		return (
 			<ScrollView
 				ref={ref => (this._scrollView = ref)}

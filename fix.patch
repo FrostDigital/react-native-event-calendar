@@ -1,0 +1,185 @@
+diff --git a/.DS_Store b/.DS_Store
+new file mode 100644
+index 0000000..e69de29
+diff --git a/src/DayView.js b/src/DayView.js
+index 88cd4dd..c948d84 100755
+--- a/src/DayView.js
++++ b/src/DayView.js
+@@ -9,6 +9,46 @@ export default class DayView extends Component {
+ 		this.props.eventTapped(event);
+ 	};
+ 
++	_renderTimer() {
++		const { styles } = this.props;
++		const numberOfHours = 24;
++		const numberOfQuarters = numberOfHours * 4
++		const timeNowHour = moment().hour();
++		const timeNowMin = moment().minutes();
++		let quarters = [];
++
++		for (let index = 0; index < numberOfQuarters; index++) {
++			let hourNowIndex = timeNowHour * 4;
++			if (timeNowMin > 0 && timeNowMin < 15) {
++				hourNowIndex = hourNowIndex;
++			} else if (timeNowMin >= 15 && timeNowMin < 30) {
++				hourNowIndex = hourNowIndex + 1;
++			} else if (timeNowMin >= 30 && timeNowMin < 45) {
++				hourNowIndex = hourNowIndex + 2;
++			} else if (timeNowMin >= 45 && timeNowMin < 60) {
++				hourNowIndex = hourNowIndex + 3;
++			}
++
++			if (index === hourNowIndex) {
++				quarters.push({index: index, isActive: true, isPassed: false});
++			} else if (index < hourNowIndex) {
++				quarters.push({index: index, isActive: false, isPassed: true});
++			} else if (index > hourNowIndex) {
++				quarters.push({index: index, isActive: false, isPassed: false});
++			}
++			
++		}
++
++		return quarters.map((item, ind) => {
++			return <View style={{marginLeft: -25}} key={ind}>
++				<View style={{width: 25, height: 25, paddingBottom: 2}}>
++				<View style={{width: 10, height: 10, marginTop: -5, borderRadius: 60, backgroundColor: item?.isActive ? "#FF2300" : (item?.isPassed ? "#F1F1F1" : "#444440"), borderColor: item?.isPassed ? "#BFB8B7" : "",  borderWidth: item?.isPassed ? 1 : 0}} />
++			</View>
++			
++		</View>
++		})
++	}
++
+ 	_renderEvents() {
+ 		const { styles, events } = this.props;
+ 		return events.map((event, i) => {
+@@ -81,16 +121,18 @@ export default class DayView extends Component {
+ 	}
+ 
+ 	render() {
+-		const { styles, date, width } = this.props;
++		const { styles, date, width, showQuarters } = this.props;
+ 		const today = moment();
+ 		const isToday = today.isSame(date, "day");
+ 		let viewStyles = [styles.dayView, { width }];
++
+ 		if (isToday) {
+ 			viewStyles.push(styles.todayStyle);
+ 		}
+ 
+ 		return (
+ 			<View style={viewStyles}>
++				{showQuarters && this._renderTimer()}
+ 				{this._renderEvents()}
+ 				{isToday && this._renderRedLine()}
+ 			</View>
+diff --git a/src/EventCalendar.js b/src/EventCalendar.js
+index 9148cbd..07980bc 100755
+--- a/src/EventCalendar.js
++++ b/src/EventCalendar.js
+@@ -55,7 +55,8 @@ export default class EventCalendar extends React.Component {
+ 			end = 24,
+ 			events,
+ 			isRefreshing,
+-			onRefresh
++			onRefresh,
++			showQuarters = false
+ 		} = this.props;
+ 		const date = moment(initDate);
+ 
+@@ -78,6 +79,7 @@ export default class EventCalendar extends React.Component {
+ 					onRefresh={onRefresh}
+ 					start={start}
+ 					end={end}
++					showQuarters={showQuarters}
+ 				/>
+ 			</View>
+ 		);
+diff --git a/src/EventView.js b/src/EventView.js
+index c5e15be..2cbb932 100755
+--- a/src/EventView.js
++++ b/src/EventView.js
+@@ -107,12 +107,12 @@ export default class EventView extends React.PureComponent {
+ 		return groupedEvents;
+ 	};
+ 
+-	formatTime(i) {
+-		return `${("0" + i).slice(-2)}:00`;
+-			}
++	formatTime(i, showQuarters) {
++		return showQuarters ? `${("" + i).slice(-2)}` :  `${("0" + i).slice(-2)}:00`;
++	}
+ 
+ 	_renderLines() {
+-		const { format24h, start, end } = this.props;
++		const { format24h, start, end, showQuarters } = this.props;
+ 		const offset = this.calendarHeight / (end - start);
+ 
+ 		return range(start, end + 1).map((i, index) => {
+@@ -120,13 +120,13 @@ export default class EventView extends React.PureComponent {
+ 			if (i === start) {
+ 				timeText = ``;
+ 			} else if (i < 12) {
+-				timeText = !format24h ? `${i} AM` : this.formatTime(i);
++				timeText = !format24h ? `${i} AM` : this.formatTime(i, showQuarters);
+ 			} else if (i === 12) {
+-				timeText = !format24h ? `${i} PM` : this.formatTime(i);
++				timeText = !format24h ? `${i} PM` : this.formatTime(i, showQuarters);
+ 			} else if (i === 24) {
+ 				timeText = !format24h ? `12 AM` : 0;
+ 			} else {
+-				timeText = !format24h ? `${i - 12} PM` : this.formatTime(i);
++				timeText = !format24h ? `${i - 12} PM` : this.formatTime(i, showQuarters);
+ 			}
+ 			const { width, styles } = this.props;
+ 			return [
+@@ -160,7 +160,7 @@ export default class EventView extends React.PureComponent {
+ 		let style = styles;
+ 
+ 		while (day <= endOfWeek) {
+-			components.push(this.renderDayView(day, this.state.packedEvents[day.format(DATE_FORMAT)] || [], style));
++			components.push(this.renderDayView(day, this.state.packedEvents[day.format(DATE_FORMAT)] || [], style, false));
+ 			day = day.clone().add(1, "d");
+ 			style = this.borderStyle;
+ 		}
+@@ -172,8 +172,9 @@ export default class EventView extends React.PureComponent {
+ 		);
+ 	}
+ 
+-	renderDayView(date, events, styles) {
++	renderDayView(date, events, styles, isDayView) {
+ 		const { mode, start, end, format24h, width } = this.props;
++		
+ 		return (
+ 			<DayView 
+ 				key={date}
+@@ -184,6 +185,7 @@ export default class EventView extends React.PureComponent {
+ 				events={events} 
+ 				width={this.getSingleViewWidth({ mode, width })} 
+ 				styles={styles} start={start} end={end} 
++				showQuarters={this.props.showQuarters && isDayView}
+ 			/>
+ 		);
+ 	}
+@@ -193,7 +195,7 @@ export default class EventView extends React.PureComponent {
+ 		const eventComponent =
+ 			mode === "week"
+ 				? this.renderWeekView()
+-				: this.renderDayView(date, this.state.packedEvents[date.format(DATE_FORMAT)] || [], styles);
++				: this.renderDayView(date, this.state.packedEvents[date.format(DATE_FORMAT)] || [], styles, true);
+ 		return (
+ 			<ScrollView
+ 				ref={ref => (this._scrollView = ref)}
+diff --git a/src/style.js b/src/style.js
+index 52d8d0c..2f0ed0c 100755
+--- a/src/style.js
++++ b/src/style.js
+@@ -104,7 +104,8 @@ export default function styleConstructor(theme = {}, calendarHeight) {
+ 			fontSize: 10,
+ 			fontFamily: Platform.OS === "ios" ? "Helvetica Neue" : "Roboto",
+ 			fontWeight: "500",
+-			...theme.timeLabel
++			...theme.timeLabel,
++			marginRight: 20
+ 		},
+ 		dayView: {
+ 			height: "100%",

@@ -104,7 +104,8 @@ export default function styleConstructor(theme = {}, calendarHeight) {
 			fontSize: 10,
 			fontFamily: Platform.OS === "ios" ? "Helvetica Neue" : "Roboto",
 			fontWeight: "500",
-			...theme.timeLabel
+			...theme.timeLabel,
+			marginRight: 20
 		},
 		dayView: {
 			height: "100%",

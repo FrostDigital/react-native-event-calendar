@@ -9,6 +9,46 @@ export default class DayView extends Component {
 		this.props.eventTapped(event);
 	};
 
+	_renderTimer() {
+		const { styles } = this.props;
+		const numberOfHours = 24;
+		const numberOfQuarters = numberOfHours * 4
+		const timeNowHour = moment().hour();
+		const timeNowMin = moment().minutes();
+		let quarters = [];
+
+		for (let index = 0; index < numberOfQuarters; index++) {
+			let hourNowIndex = timeNowHour * 4;
+			if (timeNowMin > 0 && timeNowMin < 15) {
+				hourNowIndex = hourNowIndex;
+			} else if (timeNowMin >= 15 && timeNowMin < 30) {
+				hourNowIndex = hourNowIndex + 1;
+			} else if (timeNowMin >= 30 && timeNowMin < 45) {
+				hourNowIndex = hourNowIndex + 2;
+			} else if (timeNowMin >= 45 && timeNowMin < 60) {
+				hourNowIndex = hourNowIndex + 3;
+			}
+
+			if (index === hourNowIndex) {
+				quarters.push({index: index, isActive: true, isPassed: false});
+			} else if (index < hourNowIndex) {
+				quarters.push({index: index, isActive: false, isPassed: true});
+			} else if (index > hourNowIndex) {
+				quarters.push({index: index, isActive: false, isPassed: false});
+			}
+			
+		}
+
+		return quarters.map((item, ind) => {
+			return <View style={{marginLeft: -25}} key={ind}>
+				<View style={{width: 25, height: 25, paddingBottom: 2}}>
+				<View style={{width: 10, height: 10, marginTop: -5, borderRadius: 60, backgroundColor: item?.isActive ? "#FF2300" : (item?.isPassed ? "#F1F1F1" : "#444440"), borderColor: item?.isPassed ? "#BFB8B7" : "",  borderWidth: item?.isPassed ? 1 : 0}} />
+			</View>
+			
+		</View>
+		})
+	}
+
 	_renderEvents() {
 		const { styles, events } = this.props;
 		return events.map((event, i) => {
@@ -81,16 +121,18 @@ export default class DayView extends Component {
 	}
 
 	render() {
-		const { styles, date, width } = this.props;
+		const { styles, date, width, showQuarters } = this.props;
 		const today = moment();
 		const isToday = today.isSame(date, "day");
 		let viewStyles = [styles.dayView, { width }];
+
 		if (isToday) {
 			viewStyles.push(styles.todayStyle);
 		}
 
 		return (
 			<View style={viewStyles}>
+				{showQuarters && this._renderTimer()}
 				{this._renderEvents()}
 				{isToday && this._renderRedLine()}
 			</View>
