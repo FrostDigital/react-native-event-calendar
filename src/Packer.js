@@ -2,6 +2,8 @@
 import moment from 'moment';
 const offset = 100;
 
+const fifteenMinutes = 1000 * 60 * 15;
+
 function buildEvent(column, left, width, dayStart) {
   const startTime = moment(column.start);
   const endTime = column.end
@@ -20,8 +22,13 @@ function buildEvent(column, left, width, dayStart) {
   return column;
 }
 
-function collision(a, b) {
-  return a.end > b.start && a.start < b.end;
+function collision(a, b) {    
+  const aEnd = new Date(a.end).getTime();
+  const bStart = new Date(b.start).getTime();
+  const padding = fifteenMinutes;
+
+  // Add some padding to the collision logic
+  return (aEnd + padding) > bStart && a.start < b.end;
 }
 
 function expand(ev, column, columns) {
@@ -74,9 +81,14 @@ function populateEvents(events, screenWidth, dayStart) {
 
   columns = [];
   lastEnd = null;
+  lastDuration = null;
 
   events.forEach(function(ev, index) {
-    if (lastEnd !== null && ev.start >= lastEnd) {
+    const evStartDate = new Date(ev.start);
+    const lastEndDate = lastEnd ? new Date(lastEnd) : null;
+    const timePadding = lastDuration && lastDuration < fifteenMinutes ? fifteenMinutes : 0;
+
+    if (lastEnd !== null && evStartDate.getTime() >= lastEndDate.getTime() + timePadding) {     
       pack(columns, screenWidth, calculatedEvents, dayStart);
       columns = [];
       lastEnd = null;
@@ -98,6 +110,7 @@ function populateEvents(events, screenWidth, dayStart) {
 
     if (lastEnd === null || ev.end > lastEnd) {
       lastEnd = ev.end;
+      lastDuration = new Date(ev.end).getTime() - evStartDate.getTime();
     }
   });
 
