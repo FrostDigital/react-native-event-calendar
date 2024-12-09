@@ -88,7 +88,7 @@ function populateEvents(events, screenWidth, dayStart) {
     const lastEndDate = lastEnd ? new Date(lastEnd) : null;
     const timePadding = lastDuration && lastDuration < fifteenMinutes ? fifteenMinutes : 0;
 
-    if (lastEnd !== null && evStartDate.getTime() >= lastEndDate.getTime() + timePadding) {     
+    if (lastEndDate !== null && evStartDate.getTime() >= lastEndDate.getTime() + timePadding) {     
       pack(columns, screenWidth, calculatedEvents, dayStart);
       columns = [];
       lastEnd = null;
